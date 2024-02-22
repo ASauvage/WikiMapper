@@ -11,21 +11,28 @@ def main(url: str, output: str, levels: int = None, road: str = None, delay: int
 
     os.makedirs('./output', exist_ok=True)
 
-    if output == 'html':
-        map.create_html()
+    match output:
+        case 'html':
+            map.create_html()
 
-    elif output == 'gephi':
-        pass
+        case 'png':
+            map.create_png()
+
+        case 'json':
+            map.create_json()
+
+        case 'csv':
+            pass
 
 
 if __name__ == '__main__':
     ap = ArgumentParser()
-    ap.add_argument('-u', '--url', action='store', type=str, dest='url', required=True, help="The ")
-    ap.add_argument('-r', '--road', action='store', type=str,  dest='road', required=False, help="")
-    ap.add_argument('-l', '--levels', action='store', type=int, dest='levels', default=10, required=False, help="")
+    ap.add_argument('-u', '--url', action='store', type=str, dest='url', required=True, help="Url of the first wikipedia page that will be scanned")
+    ap.add_argument('-r', '--road', action='store', type=str,  dest='road', required=False, help="not implemented yet")
+    ap.add_argument('-l', '--levels', action='store', type=int, dest='levels', default=5, required=False, help="number of children page that will be scanned")
 
-    ap.add_argument('-o', '--output', action='store', type=str, dest='output', default='html', choices=('html', 'gephi'), help="")
-    ap.add_argument('-D', '--delay', action='store', type=int, dest='delay', default=0, help="The delay between requests")
+    ap.add_argument('-o', '--output', action='store', type=str, dest='output', default='html', choices=('html', 'png', 'json', 'csv'), help="Specify the output format")
+    ap.add_argument('-D', '--delay', action='store', type=int, dest='delay', default=0, help="Delay between requests")
 
     ap.add_argument('-v', '--verbose', action='store_true', dest='verbose', required=False, help="Shows details durring execution")
     args = ap.parse_args()

@@ -1,16 +1,29 @@
 import csv
+import json
+import networkx
 from re import finditer
 from time import sleep
 from urllib.parse import unquote
 from pyvis.network import Network
+from matplotlib import pyplot
 from requests import get, RequestException
 
 from .settings import *
 
 
-class WikiMapper(Network):
+class WikiMapper(networkx.Graph):
     def __init__(self, url: str, levels: int = 10, delay: int = 0, verbose: bool = False):
-        super().__init__(
+        super().__init__()
+
+        self.add_node(url[24:], label=url[24:], color="#9a31a8", title=f'<a href="{url}">{url[24:]}</a>')
+
+        self.url = url
+        self.levels = levels
+        self.delay = delay
+        self.verbose = verbose
+
+    def create_html(self) -> None:
+        ntw = Network(
             notebook=True,
             directed=False,
             layout=False,
@@ -24,28 +37,41 @@ class WikiMapper(Network):
             filter_menu=True
         )
 
-        # self.show_buttons(filter_='physics')
-        self.barnes_hut()
+        # ntw.show_buttons(filter_='physics')
+        ntw.barnes_hut()
+        ntw.from_nx(self)
 
-        self.add_node(url[24:], label=url[24:], color="#9a31a8", title=f'<a href="{url}">{url[24:]}</a>')
-
-        self.url = url
-        self.levels = levels
-        self.delay = delay
-        self.verbose = verbose
-
-    def create_html(self) -> None:
         with open('output/output.html', 'w', encoding="utf-8") as file:
-            file.write(self.generate_html())
+            file.write(ntw.generate_html())
 
-        print(f'-- output/output.html has been generated ---')
+        print(f'-- output/output.html has been generated - [{len(self)} nodes] --')
+
+    def create_json(self) -> None:
+        network_data = networkx.node_link_data(self)
+
+        with open('output/output.json', 'w', encoding='utf-8') as file:
+            file.write(json.dumps(network_data, ensure_ascii=False, indent=4))
+
+        print(f'-- output/output.json has been generated - [{len(self)} nodes] --')
+
+    def create_png(self) -> None:
+        options = {
+            'with_labels': False,
+            'font_size': 9,
+            'node_size': 100,
+            'node_color': [COLORS[x % len(COLORS)] for x in range(len(self))],
+            'width': 1,
+        }
+
+        pyplot.figure(1, figsize=(200, 80), dpi=60)
+        networkx.draw(self, pos=networkx.random_layout(self), **options)
+        pyplot.savefig('output/output.svg')
+        # pyplot.show()
+
+        print(f'-- output/output.svg has been generated - [{len(self)} nodes] --')
 
     def get_related_pages(self, url) -> list[str]:
-        nodes = {
-            'nodes': list(),
-            'label': list(),
-            'title': list()
-        }
+        nodes = list()
         edges = list()
 
         try:
@@ -65,23 +91,21 @@ class WikiMapper(Network):
             if any(substring in href for substring in EXCLUDED_PAGES):
                 continue
 
-            if href not in nodes['nodes']:
-                nodes['nodes'].append(href)
-                nodes['label'].append(title)
-                nodes['title'].append(f'<a href="{WIKIPEDIA_SRV_FR + href}" target="_blank">{title}</a>')
+            if href not in self:
+                nodes.append(href)
+                self.add_node(href, label=title, title=f'<a href="{WIKIPEDIA_SRV_FR + href}" target="_blank">{title}</a>', color=COLORS[len(nodes) % len(COLORS)])
 
             edges.append((url, href))
 
         edges = list(dict.fromkeys(edges))
 
-        self.add_nodes(**nodes)
-        self.add_edges(edges)
+        self.add_edges_from(edges)
 
         # debug options
         if self.verbose:
             print(f"[done] '{url}': {len(edges)} nodes")
 
-        return nodes['nodes']
+        return nodes
 
     def complete_graph(self, ids: list[str], level: int = 0) -> None:
         clevel = level
