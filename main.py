@@ -16,7 +16,7 @@ def main(url: str, output: str, levels: int = None, road: str = None, delay: int
             map.create_html()
 
         case 'png':
-            pass
+            map.create_png()
 
         case 'json':
             map.create_json()

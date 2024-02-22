@@ -44,25 +44,31 @@ class WikiMapper(networkx.Graph):
         with open('output/output.html', 'w', encoding="utf-8") as file:
             file.write(ntw.generate_html())
 
-        print(f'-- output/output.html has been generated ---')
+        print(f'-- output/output.html has been generated - [{len(self)} nodes] --')
 
     def create_json(self) -> None:
-        network_data = {'nodes': dict(self.nodes), 'edges': [e for e in self.edges]}
+        network_data = networkx.node_link_data(self)
 
         with open('output/output.json', 'w', encoding='utf-8') as file:
             file.write(json.dumps(network_data, ensure_ascii=False, indent=4))
 
-        print(f'-- output/output.json has been generated ---')
+        print(f'-- output/output.json has been generated - [{len(self)} nodes] --')
 
     def create_png(self) -> None:
         options = {
-            'node_color': 'black',
-            'node_size': 10,
+            'with_labels': False,
+            'font_size': 9,
+            'node_size': 100,
+            'node_color': [COLORS[x % len(COLORS)] for x in range(len(self))],
             'width': 1,
         }
 
-        networkx.draw_random(self, **options)
-        pyplot.show()
+        pyplot.figure(1, figsize=(200, 80), dpi=60)
+        networkx.draw(self, pos=networkx.random_layout(self), **options)
+        pyplot.savefig('output/output.svg')
+        # pyplot.show()
+
+        print(f'-- output/output.svg has been generated - [{len(self)} nodes] --')
 
     def get_related_pages(self, url) -> list[str]:
         nodes = list()
