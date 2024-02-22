@@ -22,6 +22,9 @@ class WikiMapper(networkx.Graph):
         self.delay = delay
         self.verbose = verbose
 
+    def graph_stats(self) -> str:
+        return f'{len(self)} nodes / {len(self.edges)} edges'
+
     def create_html(self) -> None:
         ntw = Network(
             notebook=True,
@@ -44,7 +47,7 @@ class WikiMapper(networkx.Graph):
         with open('output/output.html', 'w', encoding="utf-8") as file:
             file.write(ntw.generate_html())
 
-        print(f'-- output/output.html has been generated - [{len(self)} nodes] --')
+        print(f'-- output/output.html has been generated - [{self.graph_stats()}] --')
 
     def create_json(self) -> None:
         network_data = networkx.node_link_data(self)
@@ -52,9 +55,9 @@ class WikiMapper(networkx.Graph):
         with open('output/output.json', 'w', encoding='utf-8') as file:
             file.write(json.dumps(network_data, ensure_ascii=False, indent=4))
 
-        print(f'-- output/output.json has been generated - [{len(self)} nodes] --')
+        print(f'-- output/output.json has been generated - [{self.graph_stats()}] --')
 
-    def create_png(self) -> None:
+    def create_svg(self) -> None:
         options = {
             'with_labels': False,
             'font_size': 9,
@@ -68,7 +71,7 @@ class WikiMapper(networkx.Graph):
         pyplot.savefig('output/output.svg')
         # pyplot.show()
 
-        print(f'-- output/output.svg has been generated - [{len(self)} nodes] --')
+        print(f'-- output/output.svg has been generated - [{self.graph_stats()}] --')
 
     def get_related_pages(self, url) -> list[str]:
         nodes = list()
