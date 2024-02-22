@@ -57,7 +57,7 @@ class WikiMapper(networkx.Graph):
 
         print(f'-- output/output.json has been generated - [{self.graph_stats()}] --')
 
-    def create_svg(self) -> None:
+    def create_image(self, format: str) -> None:
         options = {
             'with_labels': False,
             'font_size': 9,
@@ -66,12 +66,12 @@ class WikiMapper(networkx.Graph):
             'width': 1,
         }
 
-        pyplot.figure(1, figsize=(200, 80), dpi=60)
+        pyplot.figure(1, figsize=(200, 200), dpi=50)
         networkx.draw(self, pos=networkx.random_layout(self), **options)
-        pyplot.savefig('output/output.svg')
+        pyplot.savefig('output/output.' + format)
         # pyplot.show()
 
-        print(f'-- output/output.svg has been generated - [{self.graph_stats()}] --')
+        print(f'-- output/output.{format} has been generated - [{self.graph_stats()}] --')
 
     def get_related_pages(self, url) -> list[str]:
         nodes = list()

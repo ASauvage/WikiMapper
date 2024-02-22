@@ -15,8 +15,8 @@ def main(url: str, output: str, levels: int = None, road: str = None, delay: int
         case 'html':
             map.create_html()
 
-        case 'svg':
-            map.create_svg()
+        case output if output in ('svg', 'png'):
+            map.create_image(format=output)
 
         case 'json':
             map.create_json()
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     ap.add_argument('-r', '--road', action='store', type=str,  dest='road', required=False, help="not implemented yet")
     ap.add_argument('-l', '--levels', action='store', type=int, dest='levels', default=5, required=False, help="number of children page that will be scanned")
 
-    ap.add_argument('-o', '--output', action='store', type=str, dest='output', default='html', choices=('html', 'svg', 'json', 'csv'), help="Specify the output format")
+    ap.add_argument('-o', '--output', action='store', type=str, dest='output', default='html', choices=('html', 'svg','png', 'json', 'csv'), help="Specify the output format")
     ap.add_argument('-D', '--delay', action='store', type=int, dest='delay', default=0, help="Delay between requests")
 
     ap.add_argument('-v', '--verbose', action='store_true', dest='verbose', required=False, help="Shows details durring execution")
