@@ -1,3 +1,4 @@
+import os
 from argparse import ArgumentParser
 from wikimapper.wikimapper import WikiMapper
 
@@ -8,11 +9,13 @@ def main(url: str, output: str, levels: int = None, road: str = None, delay: int
 
     map.complete_graph([url[24:]])
 
+    os.makedirs('./output', exist_ok=True)
+
     if output == 'html':
         map.create_html()
 
     elif output == 'gephi':
-        map.create_csv()
+        pass
 
 
 if __name__ == '__main__':
